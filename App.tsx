@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { ThemeToggle } from './components/ThemeToggle';
 import { PasswordDisplay } from './components/PasswordDisplay';
 import { Controls } from './components/Controls';
+import { PassphraseGenerator } from './components/PassphraseGenerator';
 import { generatePassword } from './utils/passwordGenerator';
 import { Theme, PasswordOptions, PasswordHistoryItem } from './types';
 import { ShieldCheck, History, Download } from 'lucide-react';
@@ -162,6 +163,9 @@ const App: React.FC = () => {
             </div>
           </div>
         )}
+
+        {/* Passphrase Generator */}
+        <PassphraseGenerator theme={theme} />
       </main>
 
       <footer className={`mt-16 text-sm ${theme === Theme.NEON ? 'text-cyan-800' : 'text-gray-400'}`}>
