@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Copy, Check, RefreshCw } from 'lucide-react';
 import { Theme } from '../types';
 
@@ -10,6 +10,36 @@ interface PasswordDisplayProps {
 
 export const PasswordDisplay: React.FC<PasswordDisplayProps> = ({ password, theme, onGenerate }) => {
   const [copied, setCopied] = useState(false);
+  const [strength, setStrength] = useState({ score: 0, label: 'Weak' });
+
+  useEffect(() => {
+    calculateStrength(password);
+  }, [password]);
+
+  const calculateStrength = (pass: string) => {
+    if (!pass) {
+      setStrength({ score: 0, label: '' });
+      return;
+    }
+
+    let score = 0;
+    if (/[a-z]/.test(pass)) score++;
+    if (/[A-Z]/.test(pass)) score++;
+    if (/\d/.test(pass)) score++;
+    if (/[^a-zA-Z0-9]/.test(pass)) score++;
+
+    let label = 'Weak';
+    if (score === 2) label = 'Fair';
+    if (score === 3) label = 'Strong';
+    if (score === 4) {
+      label = 'Very Strong';
+      if (pass.length >= 18) label = 'Extremely Strong';
+    }
+    // Adjust label if score is 1
+    if (score === 1) label = 'Weak';
+
+    setStrength({ score, label });
+  };
 
   const handleCopy = async () => {
     if (!password) return;
@@ -53,31 +83,25 @@ export const PasswordDisplay: React.FC<PasswordDisplayProps> = ({ password, them
 
   const styles = getStyles();
 
-  // Helper to render strength bars
-  const renderStrengthBars = () => {
-    // We always show 4 bars because the generator ensures strict/strong passwords.
-    // Neon Theme: Uniform Royal Blue to avoid confusion about "half-filled" state
-    
-    if (theme === Theme.NEON) {
-      return (
-        <>
-          <div className="flex-1 rounded-full bg-blue-600 shadow-[0_0_8px_#2563eb] transition-all duration-500"></div>
-          <div className="flex-1 rounded-full bg-blue-600 shadow-[0_0_8px_#2563eb] transition-all duration-500 delay-75"></div>
-          <div className="flex-1 rounded-full bg-blue-600 shadow-[0_0_8px_#2563eb] transition-all duration-500 delay-150"></div>
-          <div className="flex-1 rounded-full bg-blue-600 shadow-[0_0_8px_#2563eb] transition-all duration-500 delay-200"></div>
-        </>
-      );
+  // Helper to get bar color based on score
+  const getBarColor = (index: number) => {
+    const isActive = index < strength.score;
+    // Inactive bar color
+    if (!isActive) {
+      return theme === Theme.NEON ? 'bg-gray-800' : 'bg-gray-200';
     }
 
-    // Default Green for other themes
-    return (
-      <>
-        <div className="flex-1 rounded-full bg-green-500 transition-all duration-300"></div>
-        <div className="flex-1 rounded-full bg-green-500 transition-all duration-300 delay-75"></div>
-        <div className="flex-1 rounded-full bg-green-500 transition-all duration-300 delay-150"></div>
-        <div className="flex-1 rounded-full bg-green-500 transition-all duration-300 delay-200"></div>
-      </>
-    );
+    // Active Colors
+    if (theme === Theme.NEON) {
+        if (strength.score <= 2) return 'bg-orange-600 shadow-[0_0_5px_#ea580c]';
+        if (strength.score === 3) return 'bg-yellow-400 shadow-[0_0_5px_#facc15]';
+        return 'bg-cyan-500 shadow-[0_0_8px_#06b6d4]';
+    }
+    
+    // Light/Dark Themes
+    if (strength.score <= 2) return 'bg-red-500';
+    if (strength.score === 3) return 'bg-yellow-500';
+    return 'bg-green-500';
   };
 
   return (
@@ -108,10 +132,23 @@ export const PasswordDisplay: React.FC<PasswordDisplayProps> = ({ password, them
       <div className="mt-5">
          <div className={`flex justify-between items-center mb-2 text-xs font-bold uppercase tracking-widest ${styles.label}`}>
             <span>Strength</span>
-            <span>Maximum</span>
+            <span className={`transition-colors duration-300 ${
+                theme === Theme.NEON 
+                    ? (strength.label === 'Extremely Strong' ? 'text-cyan-300 drop-shadow-[0_0_5px_#06b6d4]' : 'text-orange-500') 
+                    : (strength.score >= 4 ? 'text-green-600' : strength.score === 3 ? 'text-yellow-600' : 'text-red-500')
+            }`}>
+                {strength.label}
+            </span>
          </div>
          <div className="flex gap-2 h-2">
-            {renderStrengthBars()}
+            {[0, 1, 2, 3].map((i) => (
+                <div 
+                    key={i} 
+                    className={`flex-1 rounded-full transition-all duration-500 ${getBarColor(i)} ${
+                        i === 1 ? 'delay-75' : i === 2 ? 'delay-150' : i === 3 ? 'delay-200' : ''
+                    }`} 
+                />
+            ))}
          </div>
       </div>
     </div>
