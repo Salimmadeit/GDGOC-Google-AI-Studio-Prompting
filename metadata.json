@@ -1,0 +1,5 @@
+{
+  "name": "SecureGen - Neon Password Generator",
+  "description": "A robust random password generator featuring strict security pattern enforcement and multiple themes including a vibrant Neon Orange-Blue mode.",
+  "requestFramePermissions": []
+}
