@@ -4,7 +4,7 @@ import { PasswordDisplay } from './components/PasswordDisplay';
 import { Controls } from './components/Controls';
 import { generatePassword } from './utils/passwordGenerator';
 import { Theme, PasswordOptions, PasswordHistoryItem } from './types';
-import { ShieldCheck, History } from 'lucide-react';
+import { ShieldCheck, History, Download } from 'lucide-react';
 
 const App: React.FC = () => {
   const [theme, setTheme] = useState<Theme>(Theme.LIGHT);
@@ -29,6 +29,28 @@ const App: React.FC = () => {
       return [newItem, ...prev].slice(0, 5);
     });
   }, [options]);
+
+  const handleExportHistory = () => {
+    if (history.length === 0) return;
+
+    const exportData = history.map(item => {
+      const date = new Date(item.timestamp).toLocaleString();
+      return `[${date}] ${item.password}`;
+    }).join('\n');
+
+    const header = `SecureGen Password History\nExport Date: ${new Date().toLocaleString()}\n\n`;
+    const blob = new Blob([header + exportData], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `securegen-history-${Date.now()}.txt`;
+    document.body.appendChild(link);
+    link.click();
+    
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  };
 
   useEffect(() => {
     handleGenerate();
@@ -95,10 +117,27 @@ const App: React.FC = () => {
                 ? 'border-gray-800 bg-gray-800/30' 
                 : 'border-gray-200 bg-white'
           }`}>
-            <div className="flex items-center gap-2 mb-4 opacity-70">
-              <History size={16} />
-              <h3 className="text-sm font-semibold uppercase tracking-wider">Recent History</h3>
+            <div className="flex justify-between items-center mb-4">
+              <div className="flex items-center gap-2 opacity-70">
+                <History size={16} />
+                <h3 className="text-sm font-semibold uppercase tracking-wider">Recent History</h3>
+              </div>
+              <button
+                onClick={handleExportHistory}
+                className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-bold uppercase tracking-wider transition-all duration-300 ${
+                  theme === Theme.NEON 
+                    ? 'hover:bg-cyan-900/30 text-cyan-500 hover:text-cyan-300' 
+                    : theme === Theme.DARK 
+                      ? 'hover:bg-gray-700 text-gray-400 hover:text-gray-200' 
+                      : 'hover:bg-gray-100 text-gray-500 hover:text-gray-800'
+                }`}
+                title="Download History as Text File"
+              >
+                <span className="hidden sm:inline">Export</span>
+                <Download size={14} />
+              </button>
             </div>
+            
             <div className="space-y-2">
               {history.map((item, index) => (
                 <div 
