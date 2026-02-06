@@ -91,7 +91,7 @@ export const PassphraseGenerator: React.FC<PassphraseGeneratorProps> = ({ theme 
 
       {/* Display Area */}
       <div className={`relative w-full rounded-xl p-4 mb-6 border-2 transition-all ${styles.displayBox}`}>
-        <div className="font-mono text-lg break-words leading-relaxed min-h-[3rem] flex items-center">
+        <div className="font-mono text-lg break-all leading-relaxed min-h-[3rem] flex items-center pr-10">
           {passphrase}
         </div>
         <div className="absolute top-2 right-2 flex gap-1">
@@ -140,7 +140,6 @@ export const PassphraseGenerator: React.FC<PassphraseGeneratorProps> = ({ theme 
             <option value="-">Hyphen (-)</option>
             <option value=" ">Space ( )</option>
             <option value="_">Underscore (_)</option>
-            <option value=".">Period (.)</option>
           </select>
         </div>
       </div>
